@@ -1,0 +1,14 @@
+# Окружение
+venv/
+.env
+__pycache__/
+*.pyc
+
+# Данные и артефакты
+data/
+artifacts/
+
+# IDE
+.vscode/
+.idea/
+venv/
