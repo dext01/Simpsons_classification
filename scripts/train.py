@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.dataset import get_dataloaders
 from src.model import get_resnet18_finetune
-from src.utils import train_model
+from src.utils import train_model, seed_everything
 
 
 def main():
@@ -17,7 +17,12 @@ def main():
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--artifact_dir", type=str, default="artifacts")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+
+    seed_everything(args.seed)
+
+    print(f"⚙️ Config: seed={args.seed}, epochs={args.epochs}, lr={args.lr}, batch_size={args.batch_size}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🚀 Using device: {device}")

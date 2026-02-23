@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.dataset import get_dataloaders
 from src.model import get_resnet18_finetune
-
+from src.utils import seed_everything
 
 def main():
     parser = argparse.ArgumentParser()
@@ -21,7 +21,10 @@ def main():
     parser.add_argument("--data_path", type=str, default="./data")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--save_cm", type=str, default=None, help="Сохранить матрицу ошибок в файл (путь)")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+
+    seed_everything(args.seed)
 
     if not os.path.exists(args.model_path):
         print(f"❌ Ошибка: Файл модели не найден: {args.model_path}")
@@ -29,6 +32,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🚀 Using device: {device}")
+    print(f"⚙️ Config: seed={args.seed}, batch_size={args.batch_size}")
 
     _, val_loader, classes = get_dataloaders(args.data_path, args.batch_size)
     num_classes = len(classes)
