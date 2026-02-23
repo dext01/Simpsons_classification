@@ -9,7 +9,7 @@
     Предобученные веса: ImageNet (IMAGENET1K_V1)
     Функция активации выхода: Softmax
     Функция потерь: CrossEntropyLoss
-    Оптимизатор: Adam (lr=1e-4)
+    Оптимизатор: Adam (lr=1e-5)
 ```
 
 ### Быстрый старт в google colab`e
