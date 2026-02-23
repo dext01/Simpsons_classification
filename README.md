@@ -46,6 +46,18 @@ path = kagglehub.dataset_download("alexattia/the-simpsons-characters-dataset")
 ### 6. Запускаем тренировочный файл модели
 ```
 python scripts/train.py --batch_size 32 --epochs 20 --lr 0.0001 --seed 42
+результат - artifacts_collab_test/seed42_lr104.jpeg
+
+для ананлиза запустим с другими параметрами:
+python scripts/train.py --batch_size 32 --epochs 20 --lr 0.00001 --seed 42
+
+что изменилось? - lr(learning rate) 0.0001 -> 0.00001
+результат - artifacts_collab_test/seed42_lr105.jpeg
+```
+```
+в чем отличия?
+при уменьшении lr наша можель стабильнее обучается, это видно из плавных графиков в seed42_lr105.jpeg,
+где в оличие от seed42_lr104.jpeg нет резких скачков
 ```
 #### 6.1 Что происходит на данном этапе?
 ```
