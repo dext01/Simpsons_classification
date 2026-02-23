@@ -56,6 +56,7 @@ python scripts/train.py --batch_size 32 --epochs 20 --lr 0.0001 --seed 42
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--artifact_dir", type=str, default="artifacts")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 ```
 ```
