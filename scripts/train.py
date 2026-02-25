@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import torch
+import random
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -27,8 +28,13 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🚀 Using device: {device}")
 
-    train_loader, val_loader, classes = get_dataloaders(args.data_path, args.batch_size)
+    train_loader, val_loader, classes = get_dataloaders(
+        args.data_path,
+        args.batch_size,
+        seed=args.seed
+    )
     print(f"📊 Number of classes: {len(classes)}")
+
     print(f"📦 Train batches: {len(train_loader)}, Val batches: {len(val_loader)}")
 
     model = get_resnet18_finetune(num_classes=len(classes)).to(device)
