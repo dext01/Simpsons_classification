@@ -206,3 +206,10 @@ charles_montgomery_burns     0.9837    0.9918    0.9877       243
 ```
 (images/confusion_matrix.png)
 ```
+### Результат на тестовом датасете с кагла:
+```
+Accuracy: 98.79%
+Macro Precision: 0.9002
+Macro Recall: 0.8980
+Macro F1: 0.8990
+```
