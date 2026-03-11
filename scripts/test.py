@@ -4,7 +4,14 @@ import torch
 import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from sklearn.metrics import accuracy_score,_score, recall_score, f1, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
@@ -16,7 +23,6 @@ from utils import seed_everything
 def extract_character_from_filename(filename):
     if '_on_' in filename:
         return filename.split('_on_')[0]
-    # Если шаблон другой — адаптируй под свой случай
     return filename.split('.')[0]  # как fallback
 
 def organize_test_data(src_dir, dst_dir):
@@ -34,7 +40,6 @@ def organize_test_data(src_dir, dst_dir):
         shutil.copy(src, dst)
     
     print(f"✅ Структура создана в: {dst_dir}")
-    # Показываем первые 5 классов
     classes = sorted(os.listdir(dst_dir))
     print(f"📁 Классы: {classes[:5]} (всего {len(classes)})")
     return dst_dir
