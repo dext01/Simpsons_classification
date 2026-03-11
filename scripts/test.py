@@ -1,209 +1,113 @@
-import sys
 import os
-import argparse
+import shutil
 import torch
-import torch.nn as nn
 import numpy as np
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, \
-    f1_score
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+from sklearn.metrics import accuracy_score,_score, recall_score, f1, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
-import shutil
+import sys
+sys.path.insert(0, './src')
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from model import get_resnet18_finetune
+from utils import seed_everything
 
-from src.dataset import get_dataloaders
-from src.model import get_resnet18_finetune
-from src.utils import seed_everything
+def extract_character_from_filename(filename):
+    if '_on_' in filename:
+        return filename.split('_on_')[0]
+    # Если шаблон другой — адаптируй под свой случай
+    return filename.split('.')[0]  # как fallback
 
+def organize_test_data(src_dir, dst_dir):
+    os.makedirs(dst_dir, exist_ok=True)
+    
+    files = [f for f in os.listdir(src_dir) if f.lower().endswith(('.jpg', '.png'))]
+    print(f"🔍 Найдено {len(files)} тестовых изображений")
 
-def prepare_kaggle_test_data(output_dir="data/test_kaggle"):
-
-    print("📥 Скачиваем тестовый датасет с Kaggle...")
-
-    try:
-        from kagglehub import dataset_download
-        path = dataset_download("alexattia/the-simpsons-characters-dataset")
-    except ImportError:
-        print("❌ Ошибка: kagglehub не установлен. Установите: pip install kagglehub")
-        return None
-    except Exception as e:
-        print(f"❌ Ошибка при скачивании датасета: {e}")
-        return None
-
-    test_images_dir = os.path.join(path, "testset", "testset")
-    csv_file = os.path.join(path, "testset", "testset.csv")
-
-    if not os.path.exists(test_images_dir):
-        print(f"❌ Папка с тестовыми изображениями не найдена: {test_images_dir}")
-        return None
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    if os.path.exists(csv_file):
-        print(f"📄 Читаем разметку из {csv_file}...")
-        df = pd.read_csv(csv_file)
-
-        classes = df['character'].unique()
-        for cls in classes:
-            os.makedirs(os.path.join(output_dir, cls), exist_ok=True)
-
-        print(f"🔄 Организуем {len(df)} изображений в структуру папок...")
-        for _, row in df.iterrows():
-            img_id = row['id']
-            character = row['character']
-            src = os.path.join(test_images_dir, f"{img_id}.jpg")
-            dst = os.path.join(output_dir, character, f"{img_id}.jpg")
-
-            if os.path.exists(src):
-                shutil.copy(src, dst)
-            else:
-                print(f"⚠️  Внимание: {src} не найден")
-
-        print(f"✅ Тестовые данные организованы в {output_dir}/")
-        print(f"📊 Классов: {len(classes)}, Всего изображений: {len(df)}")
-        return output_dir
-    else:
-        print(f"❌ Файл разметки не найден: {csv_file}")
-        return None
-
+    for filename in files:
+        character = extract_character_from_filename(filename)
+        char_dir = os.path.join(dst_dir, character)
+        os.makedirs(char_dir, exist_ok=True)
+        src = os.path.join(src_dir, filename)
+        dst = os.path.join(char_dir, filename)
+        shutil.copy(src, dst)
+    
+    print(f"✅ Структура создана в: {dst_dir}")
+    # Показываем первые 5 классов
+    classes = sorted(os.listdir(dst_dir))
+    print(f"📁 Классы: {classes[:5]} (всего {len(classes)})")
+    return dst_dir
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="artifacts/best_model.pth", help="Путь к весам модели")
-    parser.add_argument("--test_path", type=str, default=None,
-                        help="Путь к тестовым данным (если не указан, скачает с Kaggle)")
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--save_cm", type=str, default="artifacts/test_confusion_matrix.png",
-                        help="Сохранить матрицу ошибок")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
-    args = parser.parse_args()
+    TEST_DIR = "/content/kaggle_simpson_testset/kaggle_simpson_testset"  # ← замени на путь к твоей папке с .jpg
+    TEMP_TEST_DIR = "data/test_simple"
+    MODEL_PATH = "artifacts/best_model.pth"
+    BATCH_SIZE = 32
+    SEED = 42
 
-    seed_everything(args.seed)
+    seed_everything(SEED)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"🚀 Using device: {device}")
-    print(f"⚙️ Config: seed={args.seed}, batch_size={args.batch_size}")
-
-    # Если путь к тестовым данным не указан или не существует - скачиваем с Kaggle
-    if args.test_path is None or not os.path.exists(args.test_path):
-        print(f"⚠️  Тестовые данные не найдены. Скачиваем с Kaggle...")
-        test_path = prepare_kaggle_test_data()
-        if test_path is None:
-            print("❌ Не удалось подготовить тестовые данные. Завершение.")
-            return
-        args.test_path = test_path
-
-    from torchvision import datasets, transforms
-    from torch.utils.data import DataLoader
+    test_root = organize_test_data(TEST_DIR, TEMP_TEST_DIR)
 
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
+    
+    dataset = datasets.ImageFolder(root=test_root, transform=transform)
+    loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
+    classes = dataset.classes
+    print(f"📊 Классы: {len(classes)} | Батчи: {len(loader)}")
 
-    test_dataset = datasets.ImageFolder(root=args.test_path, transform=transform)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2)
-    classes = test_dataset.classes
-    num_classes = len(classes)
-
-    print(f"📊 Classes: {num_classes}")
-    print(f"📦 Test batches: {len(test_loader)}")
-    print(f"📁 Test path: {args.test_path}")
-
-    model = get_resnet18_finetune(num_classes=num_classes).to(device)
-
-    try:
-        state_dict = torch.load(args.model_path, map_location=device, weights_only=True)
-        model.load_state_dict(state_dict)
-        print(f"✅ Model loaded: {args.model_path}")
-    except Exception as e:
-        print(f"❌ Error loading weights: {e}")
-        return
-
+    model = get_resnet18_finetune(num_classes=len(classes)).to('cuda' if torch.cuda.is_available() else 'cpu')
+    state_dict = torch.load(MODEL_PATH, map_location=model.device, weights_only=True)
+    model.load_state_dict(state_dict)
     model.eval()
-    criterion = nn.CrossEntropyLoss()
+    print("✅ Модель загружена")
 
-    all_preds = []
-    all_labels = []
-    total_loss = 0.0
-    total_samples = 0
-
-    print("🔄 Running test evaluation...")
-
+    all_preds, all_labels = [], []
     with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-
+        for inputs, labels in loader:
+            inputs, labels = inputs.to(model.device), labels.to(model.device)
             outputs = model(inputs)
-            loss = criterion(outputs, labels)
-
-            total_loss += loss.item() * inputs.size(0)
-
             _, preds = torch.max(outputs, 1)
-
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-            total_samples += labels.size(0)
 
     y_true = np.array(all_labels)
     y_pred = np.array(all_preds)
-    avg_loss = total_loss / total_samples
 
     acc = accuracy_score(y_true, y_pred)
+    prec_macro, rec_macro, f1_macro = (
+        precision_score(y_true, y_pred, average='macro'),
+        recall_score(y_true, y_pred, average='macro'),
+        f1_score(y_true, y_pred, average='macro')
+    )
 
-    prec_macro = precision_score(y_true, y_pred, average='macro')
-    rec_macro = recall_score(y_true, y_pred, average='macro')
-    f1_macro = f1_score(y_true, y_pred, average='macro')
-
-    prec_weighted = precision_score(y_true, y_pred, average='weighted')
-    rec_weighted = recall_score(y_true, y_pred, average='weighted')
-    f1_weighted = f1_score(y_true, y_pred, average='weighted')
-
-    print("\n" + "=" * 50)
-    print("📈 ТЕСТОВЫЕ МЕТРИКИ (Kaggle Test Set)")
-    print("=" * 50)
-    print(f"Total Samples: {total_samples}")
-    print(f"Average Loss:  {avg_loss:.4f}")
-    print(f"Accuracy:      {acc * 100:.2f}%")
-    print("-" * 50)
-    print("Macro Average (все классы равны):")
-    print(f"  Precision:   {prec_macro:.4f}")
-    print(f"  Recall:      {rec_macro:.4f}")
-    print(f"  F1-Score:    {f1_macro:.4f}")
-    print("-" * 50)
-    print("Weighted Average (учет размера класса):")
-    print(f"  Precision:   {prec_weighted:.4f}")
-    print(f"  Recall:      {rec_weighted:.4f}")
-    print(f"  F1-Score:    {f1_weighted:.4f}")
-    print("=" * 50)
-
-    print("\n📋 ПОДРОБНЫЙ ОТЧЕТ ПО КЛАССАМ:")
-    labels = list(range(len(classes)))
-    print(classification_report(y_true, y_pred, target_names=classes, labels=labels, digits=4, zero_division=0))
+    print("\n" + "="*60)
+    print("🎯 ТЕСТОВЫЕ МЕТРИКИ (на простом датасете)")
+    print("="*60)
+    print(f"Всего образцов: {len(y_true)}")
+    print(f"Accuracy:      {acc*100:.2f}%")
+    print(f"Macro Precision: {prec_macro:.4f}")
+    print(f"Macro Recall:    {rec_macro:.4f}")
+    print(f"Macro F1:        {f1_macro:.4f}")
+    print("="*60)
 
     cm = confusion_matrix(y_true, y_pred)
-
-    # Сохраняем матрицу ошибок
-    save_path = args.save_cm
-    os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else ".", exist_ok=True)
-
-    plt.figure(figsize=(15, 15))
-    cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-    sns.heatmap(cm_norm, annot=False, fmt='.2f', cmap='Blues',
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(cm, annot=False, fmt='d', cmap='Blues',
                 xticklabels=classes, yticklabels=classes)
-    plt.title("Normalized Confusion Matrix (Test Set)")
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
+    plt.title("Confusion Matrix (Test Set)")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
     plt.xticks(rotation=90)
     plt.yticks(rotation=0)
     plt.tight_layout()
-    plt.savefig(save_path)
-    print(f"\n✅ Confusion Matrix saved to: {save_path}")
-
+    plt.savefig("artifacts/test_confusion_simple.png")
+    print("✅ Confusion matrix saved to: artifacts/test_confusion_simple.png")
 
 if __name__ == "__main__":
     main()
