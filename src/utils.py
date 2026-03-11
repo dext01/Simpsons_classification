@@ -18,9 +18,18 @@ def seed_everything(seed=42):
     print(f"✅ Random seed set to: {seed}")
 
 
-def train_model(model, train_loader, val_loader, device, epochs=20, lr=1e-4, save_dir="artifacts"):
+def train_model(model, train_loader, val_loader, device, epochs=20, lr=1e-4, save_dir="artifacts",
+                optimizer_name="adam"):
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+    if optimizer_name.lower() == "adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    elif optimizer_name.lower() == "sgd":
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    elif optimizer_name.lower() == "sgd_momentum":
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    else:
+        raise ValueError(f"Unknown optimizer: {optimizer_name}")
 
     train_losses, val_accuracies = [], []
     best_val_acc = 0.0
@@ -57,14 +66,15 @@ def train_model(model, train_loader, val_loader, device, epochs=20, lr=1e-4, sav
         if acc > best_val_acc:
             best_val_acc = acc
             best_epoch = epoch + 1
-            best_model_path = os.path.join(save_dir, "best_model.pth")
+            best_model_path = os.path.join(save_dir, f"best_model_{optimizer_name}.pth")
             os.makedirs(save_dir, exist_ok=True)
             torch.save(model.state_dict(), best_model_path)
             print(f"🏆 NEW BEST! Model saved at epoch {best_epoch} | Val Acc: {acc:.2f}%")
 
-        print(f"Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.4f} | Val Acc: {acc:.2f}% | Best: {best_val_acc:.2f}%")
+        print(
+            f"Epoch {epoch + 1}/{epochs} | Optimizer: {optimizer_name} | Loss: {avg_loss:.4f} | Val Acc: {acc:.2f}% | Best: {best_val_acc:.2f}%")
 
-    final_model_path = os.path.join(save_dir, "model.pth")
+    final_model_path = os.path.join(save_dir, f"model_{optimizer_name}.pth")
     torch.save(model.state_dict(), final_model_path)
     print(f"\n✅ Final model saved: {final_model_path}")
     print(f"🏆 BEST model (epoch {best_epoch}) saved: {best_model_path} | Val Acc: {best_val_acc:.2f}%")
@@ -73,15 +83,23 @@ def train_model(model, train_loader, val_loader, device, epochs=20, lr=1e-4, sav
     plt.subplot(1, 2, 1)
     plt.plot(train_losses, label="Train Loss")
     plt.axhline(y=min(train_losses), color='r', linestyle='--', label=f'Min: {min(train_losses):.4f}')
-    plt.title("Training Loss")
+    plt.title(f"Training Loss ({optimizer_name.upper()})")
     plt.legend()
 
     plt.subplot(1, 2, 2)
     plt.plot(val_accuracies, label="Val Accuracy", color="orange")
     plt.axhline(y=best_val_acc, color='g', linestyle='--', label=f'Best: {best_val_acc:.2f}%')
-    plt.title("Validation Accuracy (%)")
+    plt.title(f"Validation Accuracy (%) ({optimizer_name.upper()})")
     plt.legend()
 
-    plt.savefig(os.path.join(save_dir, "training_curve.png"))
+    plt.savefig(os.path.join(save_dir, f"training_curve_{optimizer_name}.png"))
     plt.close()
-    print(f"📊 Training curves saved to {save_dir}/training_curve.png")
+    print(f"📊 Training curves saved to {save_dir}/training_curve_{optimizer_name}.png")
+
+    return {
+        'train_losses': train_losses,
+        'val_accuracies': val_accuracies,
+        'best_val_acc': best_val_acc,
+        'optimizer': optimizer_name,
+        'lr': lr
+    }
