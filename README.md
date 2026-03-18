@@ -213,3 +213,132 @@ Macro Precision: 0.9002
 Macro Recall: 0.8980
 Macro F1: 0.8990
 ```
+# Исползование оптимайзеров SGD и SGD+Momentum в обучении
+```
+
+
+✅ Random seed set to: 42
+🚀 Using device: cuda
+📊 Number of classes: 42
+
+==================================================
+Training with ADAM (lr=0.0001)
+==================================================
+Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /root/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth
+100% 44.7M/44.7M [00:00<00:00, 136MB/s]
+🏆 NEW BEST! Model saved at epoch 1 | Val Acc: 91.52%
+Epoch 1/20 | Optimizer: adam | Loss: 0.8064 | Val Acc: 91.52% | Best: 91.52%
+🏆 NEW BEST! Model saved at epoch 2 | Val Acc: 94.46%
+Epoch 2/20 | Optimizer: adam | Loss: 0.1430 | Val Acc: 94.46% | Best: 94.46%
+🏆 NEW BEST! Model saved at epoch 3 | Val Acc: 95.10%
+Epoch 3/20 | Optimizer: adam | Loss: 0.0359 | Val Acc: 95.10% | Best: 95.10%
+Epoch 4/20 | Optimizer: adam | Loss: 0.0149 | Val Acc: 94.84% | Best: 95.10%
+Epoch 5/20 | Optimizer: adam | Loss: 0.0109 | Val Acc: 94.84% | Best: 95.10%
+Epoch 6/20 | Optimizer: adam | Loss: 0.0239 | Val Acc: 93.22% | Best: 95.10%
+Epoch 7/20 | Optimizer: adam | Loss: 0.0527 | Val Acc: 92.00% | Best: 95.10%
+Epoch 8/20 | Optimizer: adam | Loss: 0.0213 | Val Acc: 94.55% | Best: 95.10%
+Epoch 9/20 | Optimizer: adam | Loss: 0.0200 | Val Acc: 94.24% | Best: 95.10%
+Epoch 10/20 | Optimizer: adam | Loss: 0.0134 | Val Acc: 93.62% | Best: 95.10%
+Epoch 11/20 | Optimizer: adam | Loss: 0.0122 | Val Acc: 93.72% | Best: 95.10%
+Epoch 12/20 | Optimizer: adam | Loss: 0.0241 | Val Acc: 94.27% | Best: 95.10%
+Epoch 13/20 | Optimizer: adam | Loss: 0.0118 | Val Acc: 94.29% | Best: 95.10%
+Epoch 14/20 | Optimizer: adam | Loss: 0.0183 | Val Acc: 94.53% | Best: 95.10%
+Epoch 15/20 | Optimizer: adam | Loss: 0.0153 | Val Acc: 93.98% | Best: 95.10%
+Epoch 16/20 | Optimizer: adam | Loss: 0.0091 | Val Acc: 94.39% | Best: 95.10%
+Epoch 17/20 | Optimizer: adam | Loss: 0.0150 | Val Acc: 92.38% | Best: 95.10%
+Epoch 18/20 | Optimizer: adam | Loss: 0.0149 | Val Acc: 94.79% | Best: 95.10%
+Epoch 19/20 | Optimizer: adam | Loss: 0.0066 | Val Acc: 94.27% | Best: 95.10%
+Epoch 20/20 | Optimizer: adam | Loss: 0.0113 | Val Acc: 93.81% | Best: 95.10%
+
+✅ Final model saved: artifacts/optimizers_comparison/model_adam.pth
+🏆 BEST model (epoch 3) saved: artifacts/optimizers_comparison/best_model_adam.pth | Val Acc: 95.10%
+📊 Training curves saved to artifacts/optimizers_comparison/training_curve_adam.png
+```
+```
+==================================================
+Training with SGD (lr=0.01)
+==================================================
+🏆 NEW BEST! Model saved at epoch 1 | Val Acc: 87.27%
+Epoch 1/20 | Optimizer: sgd | Loss: 1.0949 | Val Acc: 87.27% | Best: 87.27%
+🏆 NEW BEST! Model saved at epoch 2 | Val Acc: 91.11%
+Epoch 2/20 | Optimizer: sgd | Loss: 0.3338 | Val Acc: 91.11% | Best: 91.11%
+🏆 NEW BEST! Model saved at epoch 3 | Val Acc: 93.14%
+Epoch 3/20 | Optimizer: sgd | Loss: 0.1560 | Val Acc: 93.14% | Best: 93.14%
+🏆 NEW BEST! Model saved at epoch 4 | Val Acc: 93.57%
+Epoch 4/20 | Optimizer: sgd | Loss: 0.0796 | Val Acc: 93.57% | Best: 93.57%
+🏆 NEW BEST! Model saved at epoch 5 | Val Acc: 93.84%
+Epoch 5/20 | Optimizer: sgd | Loss: 0.0431 | Val Acc: 93.84% | Best: 93.84%
+🏆 NEW BEST! Model saved at epoch 6 | Val Acc: 93.96%
+Epoch 6/20 | Optimizer: sgd | Loss: 0.0277 | Val Acc: 93.96% | Best: 93.96%
+🏆 NEW BEST! Model saved at epoch 7 | Val Acc: 94.39%
+Epoch 7/20 | Optimizer: sgd | Loss: 0.0198 | Val Acc: 94.39% | Best: 94.39%
+Epoch 8/20 | Optimizer: sgd | Loss: 0.0142 | Val Acc: 94.39% | Best: 94.39%
+Epoch 9/20 | Optimizer: sgd | Loss: 0.0105 | Val Acc: 94.17% | Best: 94.39%
+Epoch 10/20 | Optimizer: sgd | Loss: 0.0087 | Val Acc: 94.27% | Best: 94.39%
+Epoch 11/20 | Optimizer: sgd | Loss: 0.0077 | Val Acc: 94.34% | Best: 94.39%
+Epoch 12/20 | Optimizer: sgd | Loss: 0.0066 | Val Acc: 94.34% | Best: 94.39%
+🏆 NEW BEST! Model saved at epoch 13 | Val Acc: 94.43%
+Epoch 13/20 | Optimizer: sgd | Loss: 0.0058 | Val Acc: 94.43% | Best: 94.43%
+🏆 NEW BEST! Model saved at epoch 14 | Val Acc: 94.53%
+Epoch 14/20 | Optimizer: sgd | Loss: 0.0047 | Val Acc: 94.53% | Best: 94.53%
+Epoch 15/20 | Optimizer: sgd | Loss: 0.0048 | Val Acc: 94.29% | Best: 94.53%
+🏆 NEW BEST! Model saved at epoch 16 | Val Acc: 94.60%
+Epoch 16/20 | Optimizer: sgd | Loss: 0.0042 | Val Acc: 94.60% | Best: 94.60%
+Epoch 17/20 | Optimizer: sgd | Loss: 0.0038 | Val Acc: 94.51% | Best: 94.60%
+Epoch 18/20 | Optimizer: sgd | Loss: 0.0037 | Val Acc: 94.58% | Best: 94.60%
+Epoch 19/20 | Optimizer: sgd | Loss: 0.0034 | Val Acc: 94.58% | Best: 94.60%
+Epoch 20/20 | Optimizer: sgd | Loss: 0.0030 | Val Acc: 94.39% | Best: 94.60%
+
+✅ Final model saved: artifacts/optimizers_comparison/model_sgd.pth
+🏆 BEST model (epoch 16) saved: artifacts/optimizers_comparison/best_model_sgd.pth | Val Acc: 94.60%
+📊 Training curves saved to artifacts/optimizers_comparison/training_curve_sgd.png
+```
+```
+==================================================
+Training with SGD_MOMENTUM (lr=0.01)
+==================================================
+🏆 NEW BEST! Model saved at epoch 1 | Val Acc: 86.10%
+Epoch 1/20 | Optimizer: sgd_momentum | Loss: 0.8647 | Val Acc: 86.10% | Best: 86.10%
+🏆 NEW BEST! Model saved at epoch 2 | Val Acc: 90.35%
+Epoch 2/20 | Optimizer: sgd_momentum | Loss: 0.2823 | Val Acc: 90.35% | Best: 90.35%
+🏆 NEW BEST! Model saved at epoch 3 | Val Acc: 92.31%
+Epoch 3/20 | Optimizer: sgd_momentum | Loss: 0.1266 | Val Acc: 92.31% | Best: 92.31%
+🏆 NEW BEST! Model saved at epoch 4 | Val Acc: 93.57%
+Epoch 4/20 | Optimizer: sgd_momentum | Loss: 0.0627 | Val Acc: 93.57% | Best: 93.57%
+🏆 NEW BEST! Model saved at epoch 5 | Val Acc: 93.81%
+Epoch 5/20 | Optimizer: sgd_momentum | Loss: 0.0409 | Val Acc: 93.81% | Best: 93.81%
+Epoch 6/20 | Optimizer: sgd_momentum | Loss: 0.0409 | Val Acc: 93.14% | Best: 93.81%
+🏆 NEW BEST! Model saved at epoch 7 | Val Acc: 94.10%
+Epoch 7/20 | Optimizer: sgd_momentum | Loss: 0.0216 | Val Acc: 94.10% | Best: 94.10%
+🏆 NEW BEST! Model saved at epoch 8 | Val Acc: 94.29%
+Epoch 8/20 | Optimizer: sgd_momentum | Loss: 0.0213 | Val Acc: 94.29% | Best: 94.29%
+🏆 NEW BEST! Model saved at epoch 9 | Val Acc: 94.79%
+Epoch 9/20 | Optimizer: sgd_momentum | Loss: 0.0115 | Val Acc: 94.79% | Best: 94.79%
+Epoch 10/20 | Optimizer: sgd_momentum | Loss: 0.0100 | Val Acc: 93.57% | Best: 94.79%
+Epoch 11/20 | Optimizer: sgd_momentum | Loss: 0.0075 | Val Acc: 94.77% | Best: 94.79%
+Epoch 12/20 | Optimizer: sgd_momentum | Loss: 0.0106 | Val Acc: 94.46% | Best: 94.79%
+Epoch 13/20 | Optimizer: sgd_momentum | Loss: 0.0058 | Val Acc: 94.10% | Best: 94.79%
+Epoch 14/20 | Optimizer: sgd_momentum | Loss: 0.0115 | Val Acc: 94.08% | Best: 94.79%
+Epoch 15/20 | Optimizer: sgd_momentum | Loss: 0.0079 | Val Acc: 94.41% | Best: 94.79%
+Epoch 16/20 | Optimizer: sgd_momentum | Loss: 0.0090 | Val Acc: 94.03% | Best: 94.79%
+Epoch 17/20 | Optimizer: sgd_momentum | Loss: 0.0040 | Val Acc: 94.51% | Best: 94.79%
+Epoch 18/20 | Optimizer: sgd_momentum | Loss: 0.0030 | Val Acc: 94.51% | Best: 94.79%
+Epoch 19/20 | Optimizer: sgd_momentum | Loss: 0.0036 | Val Acc: 94.62% | Best: 94.79%
+🏆 NEW BEST! Model saved at epoch 20 | Val Acc: 95.48%
+Epoch 20/20 | Optimizer: sgd_momentum | Loss: 0.0011 | Val Acc: 95.48% | Best: 95.48%
+
+✅ Final model saved: artifacts/optimizers_comparison/model_sgd_momentum.pth
+🏆 BEST model (epoch 20) saved: artifacts/optimizers_comparison/best_model_sgd_momentum.pth | Val Acc: 95.48%
+📊 Training curves saved to artifacts/optimizers_comparison/training_curve_sgd_momentum.png
+
+============================================================
+🏆 BEST RESULTS COMPARISON
+============================================================
+ADAM            | Best Val Acc: 95.10% | LR: 0.0001
+SGD             | Best Val Acc: 94.60% | LR: 0.01
+SGD_MOMENTUM    | Best Val Acc: 95.48% | LR: 0.01
+============================================================
+
+✅ All training completed! Results saved to artifacts/optimizers_comparison
+
+```
