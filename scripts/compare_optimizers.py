@@ -12,34 +12,38 @@ from src.utils import train_model, seed_everything
 
 def main():
     DATA_PATH = "./data"
-    EPOCHS = 15
+    EPOCHS = 20
     BATCH_SIZE = 32
-    LR = 1e-3
     SEED = 42
     SAVE_DIR = "artifacts/optimizers_comparison"
+
+    OPTIMIZER_CONFIGS = {
+        "adam": {"lr": 1e-4},
+        "sgd": {"lr": 1e-2},
+        "sgd_momentum": {"lr": 1e-2}
+    }
 
     seed_everything(SEED)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    print(f"🚀 Using device: {device}")
 
     train_loader, val_loader, classes = get_dataloaders(DATA_PATH, BATCH_SIZE, seed=SEED)
     num_classes = len(classes)
-    print(f"Number of classes: {num_classes}")
+    print(f"📊 Number of classes: {num_classes}")
 
-    optimizers = ["adam", "sgd", "sgd_momentum"]
     histories = {}
 
-    for opt_name in optimizers:
+    for opt_name, config in OPTIMIZER_CONFIGS.items():
         print(f"\n{'=' * 50}")
-        print(f"Training with {opt_name.upper()}")
+        print(f"Training with {opt_name.upper()} (lr={config['lr']})")
         print(f"{'=' * 50}")
 
         model = get_resnet18_finetune(num_classes=num_classes).to(device)
 
         history = train_model(
             model, train_loader, val_loader, device,
-            epochs=EPOCHS, lr=LR, optimizer_name=opt_name,
+            epochs=EPOCHS, lr=config["lr"], optimizer_name=opt_name,
             save_dir=SAVE_DIR
         )
         histories[opt_name] = history
@@ -51,8 +55,8 @@ def main():
 def plot_comparison(histories, save_dir):
     os.makedirs(save_dir, exist_ok=True)
 
+    # График потерь
     plt.figure(figsize=(15, 5))
-
     plt.subplot(1, 2, 1)
     for opt_name, history in histories.items():
         plt.plot(history['train_losses'], label=f"{opt_name.upper()}")
@@ -62,6 +66,7 @@ def plot_comparison(histories, save_dir):
     plt.legend()
     plt.grid(True)
 
+    # График точности
     plt.subplot(1, 2, 2)
     for opt_name, history in histories.items():
         plt.plot(history['val_accuracies'], label=f"{opt_name.upper()}")
@@ -76,7 +81,7 @@ def plot_comparison(histories, save_dir):
     plt.close()
 
     print("\n" + "=" * 60)
-    print("BEST RESULTS COMPARISON")
+    print("🏆 BEST RESULTS COMPARISON")
     print("=" * 60)
     for opt_name, history in histories.items():
         print(f"{opt_name.upper():15} | Best Val Acc: {history['best_val_acc']:.2f}% | LR: {history['lr']}")
